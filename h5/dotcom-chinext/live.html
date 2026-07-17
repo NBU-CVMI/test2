@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06080c">
+<title>历史会押韵吗｜互联网泡沫 × 创业板</title>
+<style>
+html,body{margin:0;min-height:100%;background:#06080c;color:#f2f5fa;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}.boot{height:100svh;display:grid;place-items:center;text-align:center}.boot b{display:block;font-size:20px}.boot span{display:block;margin-top:12px;font-size:12px;color:#8995a7}.dot{display:inline-block;width:7px;height:7px;margin-right:8px;border-radius:50%;background:#00c087;box-shadow:0 0 14px #00c087;animation:p 1s infinite}@keyframes p{50%{opacity:.25}}
+</style>
+</head>
+<body>
+<div class="boot"><div><b><i class="dot"></i>正在载入实时行情 H5</b><span>创业板日 K 将自动更新</span></div></div>
+<script>
+(async function(){
+  const response=await fetch('./index.html?v='+Date.now(),{cache:'no-store'});
+  if(!response.ok)throw new Error('页面文件加载失败');
+  let html=await response.text();
+  const patch=`<script>
+(function(){
+  const meta=document.querySelector('.meta');
+  const range=document.querySelector('#cybStatus')?.previousElementSibling?.querySelector('.card-sub');
+  const state=document.getElementById('cybStatus');
+  let liveTimer=null,liveBusy=false,lastSuccess=0;
+  function cnClock(){return Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(new Date()).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]))}
+  function inSession(){const p=cnClock(),m=+p.hour*60 + +p.minute;return ['Mon','Tue','Wed','Thu','Fri'].includes(p.weekday)&&((m>=570&&m<=690)||(m>=780&&m<=900))}
+  function delay(){return inSession()?60000:600000}
+  function liveFetch(){return new Promise((resolve,reject)=>{const cb='live_em_'+Date.now()+'_'+Math.random().toString(36).slice(2),s=document.createElement('script');let timer,done=false;function clean(){clearTimeout(timer);delete window[cb];s.remove()}window[cb]=j=>{done=true;clean();if(!j?.data?.klines)return reject(new Error('empty'));resolve(j.data.klines.map(z=>{const a=z.split(',');return{date:a[0],open:+a[1],close:+a[2],high:+a[3],low:+a[4]}}).filter(x=>x.date>='2024-09-24'))};const q=new URLSearchParams({cb,secid:'0.399006',ut:'fa5fd1943c7b386f1734de82369f10d',fields1:'f1,f2,f3,f4,f5,f6',fields2:'f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61',klt:'101',fqt:'0',beg:'20240924',end:'20500101',lmt:'2000',_:String(Date.now())});s.src='https://push2his.eastmoney.com/api/qt/stock/kline/get?'+q;s.onerror=()=>{if(!done){clean();reject(new Error('network'))}};document.head.appendChild(s);timer=setTimeout(()=>{if(!done){clean();reject(new Error('timeout'))}},12000)})}
+  compare=function(){if(!nas.length||!cyb.length)return;const a=nas.slice(Math.max(0,nas.findIndex(x=>x.date>='1998-10-09'))),b=cyb,L=Math.min(a.length,b.length),a0=a[0].close,b0=b[0].close;xChart.setOption(lineOpt([a.slice(0,L).map((x,i)=>[i,+(x.close/a0*100).toFixed(2)]),b.slice(0,L).map((x,i)=>[i,+(x.close/b0*100).toFixed(2)])],['NASDAQ 1998','创业板 2024']),true)};
+  function render(rows){cyb=rows.slice().sort((a,b)=>a.date.localeCompare(b.date));const start=cyb[0],peak=cyb.reduce((a,b)=>b.close>a.close?b:a),last=cyb.at(-1),prev=cyb.at(-2)||last,day=(last.close/prev.close-1)*100,dd=(last.close/peak.close-1)*100;cChart.setOption(kOpt(cyb,[{name:'9·24',coord:[start.date,start.close],value:'政策'},{name:'阶段高点',coord:[peak.date,peak.close],value:peak.close.toFixed(0)},{name:'最新',coord:[last.date,last.close],value:'最新'}]),true);updateCybSummary(cyb);document.getElementById('cybLatestTitle').textContent='最新收盘 '+last.close.toFixed(2)+' · 当日 '+pct(day);document.getElementById('cybLatestCopy').textContent='相对阶段最高收盘 '+pct(dd)+'。下一交易日K线出现后，本页会自动更新。';if(meta)meta.textContent='创业板行情截至 '+last.date+' · 打开页面自动拉取最新交易日';if(range)range.textContent='2024-09-24 至 '+last.date+' · 日K自动更新';const p=cnClock();document.getElementById('cybUpdateNote').textContent='最新交易日：'+last.date+' · 最近请求：北京时间 '+p.hour+':'+p.minute+':'+p.second+'。交易时段每60秒刷新，非交易时段每10分钟检查一次。';compare();return last}
+  async function refresh(manual){if(liveBusy)return;liveBusy=true;clearTimeout(liveTimer);status('cybStatus',false,manual?'手动刷新中':'更新中');try{const rows=await liveFetch();const last=render(rows);lastSuccess=Date.now();const p=cnClock();status('cybStatus',true,'实时 '+p.hour+':'+p.minute);state.title='最新交易日 '+last.date+'；点击立即刷新'}catch(e){status('cybStatus',false,cyb?.length?'更新失败·保留'+cyb.at(-1).date:'行情接口异常')}finally{liveBusy=false;liveTimer=setTimeout(()=>refresh(false),delay())}}
+  state.classList.add('clickable');state.style.cursor='pointer';state.onclick=()=>refresh(true);
+  refresh(false);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastSuccess>60000)refresh(false)});
+  addEventListener('focus',()=>{if(Date.now()-lastSuccess>60000)refresh(false)});
+})();
+<\/script>`;
+  html=html.replace('</body>',patch+'</body>');
+  document.open();document.write(html);document.close();
+})().catch(function(error){document.body.innerHTML='<div class="boot"><div><b>页面加载失败</b><span>'+String(error.message||error)+'</span></div></div>'});
+</script>
+</body>
+</html>
