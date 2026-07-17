@@ -17,10 +17,25 @@
   <div class="loading" id="loading"><div><div class="dot"></div><h1>正在载入动态行情</h1><p>每次打开都会重新请求最新交易日数据</p></div></div>
   <script>
     const source='https://raw.githubusercontent.com/NBU-CVMI/test2/h5-dotcom-chinext/h5/dotcom-chinext/index.html';
+    const analogSection=`<div class="card analog reveal"><svg viewBox="0 0 690 470" style="display:block;width:100%;height:auto" aria-label="Post-1998 Analog weekly chart"><rect width="690" height="470" rx="18" fill="#f3f3f3"/><g font-family="Arial, PingFang SC, sans-serif"><text x="28" y="30" font-size="17" fill="#111">Post-1998 Analog (weekly)</text><text x="28" y="52" font-size="17" fill="#3847b8">SPX rebased to 10-09-98</text><text x="28" y="74" font-size="17" fill="#b94034">Current path as of 08-29-25</text></g><g stroke="#d4d4d4" stroke-width="1"><line x1="58" y1="40" x2="58" y2="392"/><line x1="58" y1="392" x2="645" y2="392"/><line x1="58" y1="360" x2="645" y2="360"/><line x1="58" y1="328" x2="645" y2="328"/><line x1="58" y1="296" x2="645" y2="296"/><line x1="58" y1="264" x2="645" y2="264"/><line x1="58" y1="232" x2="645" y2="232"/><line x1="58" y1="200" x2="645" y2="200"/><line x1="58" y1="168" x2="645" y2="168"/><line x1="58" y1="136" x2="645" y2="136"/><line x1="58" y1="104" x2="645" y2="104"/><line x1="58" y1="72" x2="645" y2="72"/><line x1="58" y1="40" x2="645" y2="40"/></g><g fill="#222" font-size="12"><text x="10" y="396">4400</text><text x="10" y="364">4800</text><text x="10" y="332">5200</text><text x="10" y="300">5600</text><text x="10" y="268">6000</text><text x="10" y="236">6400</text><text x="10" y="204">6800</text><text x="10" y="172">7200</text><text x="10" y="140">7600</text><text x="10" y="108">8000</text><text x="10" y="76">8400</text></g><g fill="#333" font-size="12"><text transform="translate(67 405) rotate(66)">2024</text><text transform="translate(188 405) rotate(66)">2025</text><text transform="translate(310 405) rotate(66)">2026</text><text transform="translate(432 405) rotate(66)">2027</text><text transform="translate(553 405) rotate(66)">2028</text><text transform="translate(645 405) rotate(66)">2029</text></g><polyline fill="none" stroke="#5d74d8" stroke-width="3" points="66,341 77,352 88,330 100,345 112,327 123,303 135,320 146,290 158,298 169,279 181,246 193,252 204,228 216,212 228,225 239,184 251,209 262,160 274,194 286,145 297,189 309,123 321,154 332,101 344,190 356,111 367,131 379,79 391,120 402,87 414,163 426,91 437,111 449,96 460,78 472,133 484,124 495,195 507,208 519,246 530,232 542,216 553,274 565,260 577,305 588,295 600,261 611,282 623,322"/><polyline fill="none" stroke="#d65c56" stroke-width="3" points="66,338 80,321 94,311 108,297 122,304 136,277 150,288 164,260 178,272 192,238 206,247 220,218 234,223 248,186 262,192"/><g fill="#303030" font-size="13"><text x="291" y="141">Jan</text><text x="287" y="155">2026</text><text x="317" y="250">Apr</text><text x="317" y="264">2026</text><text x="329" y="104">Jun</text><text x="329" y="118">2026</text><text x="355" y="197">Aug</text><text x="355" y="211">2026</text><text x="394" y="64">Sep</text><text x="394" y="78">2026</text><text x="464" y="64">Feb</text><text x="464" y="78">2027</text></g><text x="284" y="323" font-size="28" fill="#bdbdbd">@mark_ungewitter</text></svg></div></section>
+<section class="section compact"><div class="eyebrow reveal">01 / DOT-COM BUBBLE`;
+
+    function patchHtml(html){
+      html = html.replace(/<div class="card analog reveal">[\s\S]*?<\/div><\/section>\s*<section class="section compact"><div class="eyebrow reveal">01 \/ DOT-COM BUBBLE/, analogSection);
+      return html;
+    }
+
     fetch(source+'?v='+Date.now(),{cache:'no-store'})
-      .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.text()})
-      .then(html=>{document.open();document.write(html);document.close()})
-      .catch(err=>{document.getElementById('loading').innerHTML='<div><h1>页面暂时加载失败</h1><p>请刷新页面重试。错误：'+String(err.message||err)+'</p></div>'});
+      .then(r=>{if(!r.ok) throw new Error('HTTP '+r.status); return r.text();})
+      .then(html=>{
+        html = patchHtml(html);
+        document.open();
+        document.write(html);
+        document.close();
+      })
+      .catch(err=>{
+        document.getElementById('loading').innerHTML='<div><h1>页面暂时加载失败</h1><p>请刷新页面重试。错误：'+String(err.message||err)+'</p></div>';
+      });
   </script>
 </body>
 </html>
